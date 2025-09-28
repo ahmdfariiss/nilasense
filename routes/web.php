@@ -1,31 +1,35 @@
 <?php
+
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
-// 1. Route untuk Halaman Utama (Landing Page)
+// Route Halaman Utama / Landing Page
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
-// 2. Grup Route Khusus Admin (Petambak)
-// Dilindungi oleh middleware 'auth' (harus login) & 'role:admin' (harus admin)
-Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
-    
-    Route::get('/dashboard', function () {
-        return view('admin.dashboard'); // Nanti kita buat view ini
-    })->name('dashboard');
-    
-});
+// Route Dashboard Umum (butuh login)
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
 
-// 3. Grup Route untuk Pengguna yang Sudah Login (Customer & Admin)
-Route::middleware(['auth'])->group(function () {
-    // Route untuk dashboard umum yang dibuat Breeze
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+// Grup Route untuk Pengguna yang Sudah Login
+Route::middleware('auth')->group(function () {
+    // Halaman Profil
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Nanti route /monitoring dan /pakan ditaruh di sini
 });
 
+// Grup Route Khusus Admin
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', function () {
+        return view('admin.dashboard');
+    })->name('dashboard');
+});
 
-// 4. Route Autentikasi dari Breeze (login, register, logout, dll)
-require __DIR__.'/auth.php';
+// Route autentikasi yang dibuat oleh Breeze
+// Biarkan ini di paling bawah
+require __DIR__.'/../vendor/laravel/breeze/src/routes.php';
