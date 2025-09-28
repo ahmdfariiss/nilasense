@@ -32,4 +32,4 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
 // Route autentikasi yang dibuat oleh Breeze
 // Biarkan ini di paling bawah
-require __DIR__.'/../vendor/laravel/breeze/src/routes.php';
+require __DIR__.'/auth.php';
